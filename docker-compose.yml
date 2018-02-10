@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  seawars.app:
+    build: ./app
+    hostname: seawars.app
+    domainname: domain.lan
+    ports:
+      - "55555:55555"
+      - "55554:55554"
+    expose:
+      - 55555
+
+  seawars.http:
+    image: nginx:stable-alpine
+    hostname: seawars.http
+    domainname: domain.lan
+    volumes:
+      - ./html:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+      - "8443:443"

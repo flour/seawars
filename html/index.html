@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="client.css" />
+    <title>Sea wars</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="client.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <header class="blog-header py-3">
+            <div class="row align-items-center">
+                <h3>Sea wars!</h3>
+            </div>
+            <div id="won" class="alert alert-success text-center">YOU WON!!!</div>
+            <div id="lost" class="alert alert-success text-center">YOU'VE LOST!!!</div>
+            <div id="isReady" class="alert alert-success" role="alert">
+                <strong id="isReadeData">You are ready to play!</strong>
+                <span id="isReadyComment"> Wait for oponent...</span>
+            </div>
+            <div id="appAlert" class="alert alert-primary" role="alert">
+                <button id="hideMessage" class="close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <span>
+                    <div>
+                        <b id="message"></b>
+                    </div>
+                    <div id="messageComment"></div>
+                </span>
+            </div>
+        </header>
+        <div class="row mb-2">
+            <div class="col-md-4">
+                <span>
+                    <span>
+                        <b>Yours</b>
+                    </span>
+                    <button type="button" id="autoFill" class="btn btn-sm btn-outline-info">Auto fill</button>
+                    <button type="button" id="sayReady" class="btn btn-sm btn-outline-info">Ready</button>
+                    <button type="button" id="startAgain" class="btn btn-sm btn-outline-info">Start new game</button>
+                    <div id="yourField"></div>
+                    <div id="yourTurn" class="h3 text-center alert-success">
+                        Your turn to fire
+                    </div>
+                </span>
+
+            </div>
+            <div class="col-md-4">
+                <div id="history" class="col-mb-12 text-center">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <span>
+                    Oponent's
+                    <span id="opReady" class="alert-info">READY!</span>
+                </span>
+                <div id="opponentField"></div>
+                <div id="opTurn" class="h3 text-center alert-danger">
+                    Oponent's turn to fire
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

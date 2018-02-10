@@ -1,0 +1,56 @@
+table.battlefield {
+    margin: 5px;
+    border: 1px solid #333;
+    font-size: 12px;
+}
+
+td.fieldcell {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+td.fieldcell:hover{
+    background-color: lightgreen;
+    cursor: pointer;
+}
+
+td.fieldcellDisabled:hover{
+    background-color: lightcoral;
+    cursor: pointer;
+}
+
+td.shipcell{
+    background-color: lightslategray;
+    color: white;
+    text-align: center;
+}
+
+td.shipcell:hover{
+    background-color: gainsboro;
+    cursor: pointer;    
+}
+
+.fireTurn {
+    color: darkred;
+    font-weight: bold;    
+}
+
+td.missedCell {
+    background-image: url(./img/missed.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+td.hitCell {
+    background-image: url(./img/hit.png);
+    background-color: lightcoral;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+div.history  {
+    font-size: 12px;
+    border-bottom: 1px dashed #333;
+}
