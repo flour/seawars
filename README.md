@@ -26,7 +26,3 @@ When both oponents will be ready the game will start. You'll be notified who sta
 ##### Tags:
 
 platform.windows, platform.linux, lang.JS, lang.NodeJS
-
-##### Authors:
-
- * [Духнич Владислав](https://profile.smartinfosys.com/staff/30)
