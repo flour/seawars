@@ -1,4 +1,17 @@
 const dto = require("./dto");
+// I do not know how it should be... but pretend we get this stub from config or elsewhere
+const baseShipMap = [
+    { name: "four-deck", decklength: 4, state: "infight", location: [] },
+    { name: "three-deck-1", decklength: 3, state: "infight", location: [] },
+    { name: "three-deck-2", decklength: 3, state: "infight", location: [] },
+    { name: "two-deck-1", decklength: 2, state: "infight", location: [] },
+    { name: "two-deck-2", decklength: 2, state: "infight", location: [] },
+    { name: "two-deck-3", decklength: 2, state: "infight", location: [] },
+    { name: "one-deck-1", decklength: 1, state: "infight", location: [] },
+    { name: "one-deck-2", decklength: 1, state: "infight", location: [] },
+    { name: "one-deck-3", decklength: 1, state: "infight", location: [] },
+    { name: "one-deck-4", decklength: 1, state: "infight", location: [] }
+];
 
 function getRnd(max) {
     return Math.floor(Math.random() * (max + 1));
@@ -16,40 +29,91 @@ function Client(connection, id) {
     this.shipMap = [];
 
     this.setConnection = function (connection) { that.connection = connection }
-    this.fire = function (x, y) { if (that.myTurn) connection.sendText(new dto.DTO("fire", 0, new dto.Cell(x, y), "fire in the hotel!").toString()); };
-    this.sendReady = function (ready) { that.isReady = ready; that.connection.sendText(new dto.DTO("ready", ready, null, "ready state").toString()); };
-    this.sendOpReady = function (ready) { that.connection.sendText(new dto.DTO("op_ready", ready, null, "ready state").toString()); };
-    this.gotOponent = function (oponent) { that.connection.sendText(new dto.DTO("oponent", oponent).toString()) }
-    this.oponentDisconnected = function () { that.connection.sendText(new dto.DTO("op_disconnect").toString()); that.sendOpReady(false); }
-    this.canFire = function (value) { that.myTurn = value; that.connection.sendText(new dto.DTO("canfire", value).toString()) }
-    this.startGame = function () { that.connection.sendText(new dto.DTO("start").toString()) }
-    this.missedMe = function (cell) { that.connection.sendText(new dto.DTO("missed_me", cell).toString()) }
-    this.missedOponent = function (cell) { that.connection.sendText(new dto.DTO("missed", cell).toString()) }
-    this.hitMe = function (cell) { that.connection.sendText(new dto.DTO("hit_me", cell).toString()) }
-    this.hitOponent = function (cell) { that.connection.sendText(new dto.DTO("hit", cell).toString()) }
-    this.sendHistory = function () { that.connection.sendText(new dto.DTO("history", that.fireHistory[0]).toString()) };
-    this.finish = function (won) { that.connection.sendText(new dto.DTO("finish", won).toString()); that.oponentId = ""; }
-    this.restore = function () {
-        that.connection.sendText(
-            new dto.DTO("reconnect",
-                new dto.Restore(that.isReady, that.shipMap, that.fireHistory, that.oponentId)).toString()
-        )
-        if (that.isReady) that.canFire(that.myTurn);
+    this.send = function (command, value, cell, comment) {
+        var package = new dto.DTO(command, value, cell, comment);
+        that.connection.sendText(package.toString());
     }
+
+    this.fire = function (x, y) {
+        if (that.myTurn)
+            that.send("fire", null, new dto.Cell(x, y));
+    };
+
+    this.sendReady = function (ready) {
+        that.isReady = ready;
+        that.send("ready", ready);
+    };
+
+    this.sendOpReady = function (ready) {
+        that.send("op_ready", ready);
+    };
+
+    this.gotOponent = function (oponent) {
+        that.send("oponent", oponent);
+    }
+
+    this.oponentDisconnected = function () {
+        that.send("op_disconnect");
+        that.sendOpReady(false);
+    }
+
+    this.canFire = function (isMyTurn) {
+        that.myTurn = isMyTurn;
+        that.send("canfire", isMyTurn);
+    }
+
+    this.startGame = function () {
+        that.send("start");
+    }
+
+    this.missedMe = function (cell) {
+        that.send("missed_me", cell);
+    }
+
+    this.missedOponent = function (cell) {
+        that.send("missed", cell);
+    }
+
+    this.hitMe = function (cell) {
+        that.send("hit_me", cell)
+    }
+
+    this.hitOponent = function (cell) {
+        that.send("hit", cell)
+    }
+
+    this.addHistory = function (history) {
+        if (history)
+            that.fireHistory.splice(0, 0, history);
+        that.send("history", !history ? that.fireHistory[0] : history)
+    };
+
+    this.finish = function (won) {
+        that.send("finish", won);
+        that.oponentId = "";
+    }
+
+    this.restore = function () {
+        var restoreData = new dto.Restore(that.isReady, that.shipMap, that.fireHistory, that.oponentId);
+        that.send("reconnect", restoreData);
+        if (that.isReady)
+            that.canFire(that.myTurn);
+    }
+
     this.killed = function (ship) {
         that.fireHistory.splice(0, 0, new dto.FireHistory(null, false, true, ship));
-        that.connection.sendText(new dto.DTO("killed", ship).toString())
-        that.sendHistory();
+        that.send("killed", ship);
+        that.addHistory();
 
         var oponent = that.connection.server.storage.getClientById(that.oponentId);
         if (oponent) {
             oponent.fireHistory.splice(0, 0, new dto.FireHistory(null, false, false, ship));
-            oponent.connection.sendText(new dto.DTO("op_killed", ship).toString())
-            oponent.sendHistory();
+            oponent.send("op_killed", ship);
+            oponent.addHistory();
         }
         that.checkShips()
     }
-    
+
     this.isMissed = function (cell) {
         var missed = true;
         if (cell == undefined)
@@ -93,19 +157,23 @@ function Client(connection, id) {
                 that.freeCells.push(new dto.Cell(i, j).toString());
             }
         }
-        that.shipMap = [
-            { name: "four-deck", decklength: 4, state: "infight", location: [] },
-            { name: "three-deck-1", decklength: 3, state: "infight", location: [] },
-            { name: "three-deck-2", decklength: 3, state: "infight", location: [] },
-            { name: "two-deck-1", decklength: 2, state: "infight", location: [] },
-            { name: "two-deck-2", decklength: 2, state: "infight", location: [] },
-            { name: "two-deck-3", decklength: 2, state: "infight", location: [] },
-            { name: "one-deck-1", decklength: 1, state: "infight", location: [] },
-            { name: "one-deck-2", decklength: 1, state: "infight", location: [] },
-            { name: "one-deck-3", decklength: 1, state: "infight", location: [] },
-            { name: "one-deck-4", decklength: 1, state: "infight", location: [] }
-        ];
         var cells = [];
+        that.shipMap = baseShipMap;
+        for (var ship in that.shipMap) {
+            if (that.freeCells.length == 0) {
+                that.sendAutoMap();
+                return;
+            }
+            var built = false;
+            while (!built) {
+                var kx = getRnd(1);
+                var x = kx == 0 ? getRnd(9) : getRnd(10 - ship.decklength);
+                var ky = kx == 0 ? 1 : 0;
+                var y = kx == 0 ? getRnd(10 - ship.decklength) : getRnd(9);
+                built = that.checkLocation(x, y, kx, ky, ship);
+            }
+        }
+        /*
         that.shipMap.forEach(ship => {
             if (!that.prepareAutoMap(ship)) {
                 that.sendAutoMap();
@@ -113,21 +181,19 @@ function Client(connection, id) {
             }
             cells.push(ship.location);
         });
-        that.connection.sendText(new dto.DTO("autofill", cells).toString());
+        */
+        that.send("autofill", cells);
     };
-
+    /*
     this.prepareAutoMap = function (ship) {
         do {
             if (that.freeCells.length == 0)
                 return false;
-            var kx = getRnd(1);
-            var x = kx == 0 ? getRnd(9) : getRnd(10 - ship.decklength);
-            var ky = kx == 0 ? 1 : 0;
-            var y = kx == 0 ? getRnd(10 - ship.decklength) : getRnd(9);
-        } while (!that.checkLocation(x, y, kx, ky, ship));
+
+        } while (!);
         return true;
     };
-
+    */
     this.checkLocation = function (x, y, kx, ky, ship) {
         var shipCells = [];
         var decklength = ship.decklength;

@@ -27,40 +27,18 @@ var server = ws.createServer(function (connection) {
         connection.clientId = model.id;
         switch (model.type) {
             case "autofill":
-                if (client) client.sendAutoMap();
+                if (client)
+                    client.sendAutoMap();
                 break;
             case "ready":
-                if (!client) break;
-                client.sendReady(true);
-                var oponent = storage.getClientById(client.oponentId)
-                if (oponent == null)
+                if (!client)
                     break;
-                oponent.sendOpReady(true);
-                if (oponent.isReady)
-                    storage.startGame(storage.getGame(client.id));
+                storage.startGame(client);
                 break;
             case "fire":
-                if (!client) break;
-                var oponent = storage.getClientById(client.oponentId)
-                if (!client.myTurn || oponent == null)
-                    return;
-                var mineHistory = new dto.FireHistory(model.value, true, true, false);
-                var opHistory = new dto.FireHistory(model.value, true, false, false);
-                if (oponent.isMissed(model.value)) {
-                    oponent.missedMe(model.value);
-                    client.missedOponent(model.value);
-                    oponent.canFire(true);
-                    client.canFire(false);
-                } else {
-                    mineHistory.missed = false;
-                    opHistory.missed = false;
-                    oponent.hitMe(model.value);
-                    client.hitOponent(model.value);
-                }
-                client.fireHistory.splice(0, 0, mineHistory);
-                oponent.fireHistory.splice(0, 0, opHistory);
-                client.sendHistory();
-                oponent.sendHistory();
+                if (!client)
+                    break;
+                storage.makeFire(client, storage.getClientById(client.oponentId));
                 break;
             case "connect":
                 if (!client) {
@@ -69,7 +47,8 @@ var server = ws.createServer(function (connection) {
                 }
                 break;
             case "reconnect":
-                if (!client) break;
+                if (!client)
+                    break;
                 client.restore();
                 break;
             default:
@@ -78,6 +57,7 @@ var server = ws.createServer(function (connection) {
     });
     connection.on("close", function (code, reason) {
         console.log("Closed. code:" + code + ". Client Id: " + connection.clientId)
+        // something should be here...
         switch (code) {
             case 1001:
                 break;

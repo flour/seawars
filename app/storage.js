@@ -70,7 +70,16 @@ function Storage() {
         return result;
     }
 
-    this.startGame = function (game) {
+    this.startGame = function (client) {
+        if (!client)
+            return;
+        client.sendReady(true);
+        var oponent = storage.getClientById(client.oponentId)
+        if (oponent == null)
+            return;
+        oponent.sendOpReady(true);
+        if (!oponent.isReady)
+            return;
         game.clientOne.startGame();
         game.clientTwo.startGame();
         game.clientOne.canFire(game.clientOne.myTurn);
@@ -93,6 +102,26 @@ function Storage() {
 
     this.removeGame = function (game) {
         that.games.splice(that.clients.indexOf(game), 1);
+    }
+
+    this.makeFire = function (from, to, cell) {
+        if (!from || !from.myTurn || !to || !cell)
+            return;
+        var fromHistory = new dto.FireHistory(model.value, true, true, false);
+        var toHistory = new dto.FireHistory(model.value, true, false, false);
+        if (to.isMissed(cell)) {
+            from.missedOponent(cell);
+            from.canFire(false);
+            to.missedMe(cell);
+            to.canFire(true)
+        } else {
+            fromHistory.missed = false;
+            toHistory.missed = false;
+            to.hitMe(cell);
+            from.hitOponent(cell);
+        }
+        to.addHistory(toHistory);
+        from.addHistory(fromHistory);
     }
 };
 

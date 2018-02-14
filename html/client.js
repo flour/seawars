@@ -35,28 +35,29 @@ function uuidv4() {
 
 // cookies
 function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    var expires = "expires=" + d.toUTCString();
+    var date = new Date();
+    date.setTime(date.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + date.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
 function getCookie(cname) {
     var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cook = cookies[i];
+        while (cook.charAt(0) == ' ') {
+            cook = cook.substring(1);
         }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
+        if (cook.indexOf(name) == 0) {
+            return cook.substring(name.length, cook.length);
         }
     }
     return "";
 }
 
 // I hope that type can be shared...
+// nope.
 function DTO(type, value, cell, comment) {
     this.id = getCookie("identity");
     this.type = type;
@@ -145,18 +146,7 @@ function clientState() {
                 a("Your oponent disconnected", "Wait for 10 seconds...");
                 break;
             case "canfire":
-                if (that.oponentId == "") {
-                    that.canfire = false;
-                    return;
-                }
-                that.canfire = data.value == undefined ? false : data.value;
-                if (that.canfire) {
-                    $("#yourTurn").show();
-                    $("#opTurn").hide();
-                } else {
-                    $("#yourTurn").hide();
-                    $("#opTurn").show();
-                }
+                that.showCanFire();
                 break;
             case "missed":
                 $("#cell_" + (data.value.x + 1) + "_" + (data.value.y + 1) + "_op").attr("class", "missedCell");
@@ -190,34 +180,11 @@ function clientState() {
                 that.addHistory(data.value);
                 break;
             case "reconnect":
-                that.isReady = data.value.isReady;
-                that.oponentId = data.value.oponentId == undefined ? "" : data.value.oponentId;
-                if (data.value.isReady) {
-                    that.addShips(data.value.shipMap);
-                    $("#autoFill").hide();
-                    $("#sayReady").hide();
-                    $("#isReady").show();
-                }
-                if (data.value.history) {
-                    that.oponentIsReady = true;
-                    data.value.history.reverse().forEach(row => that.addHistory(row))
-                }
-                if (that.map.length == 0) {
-                    that.init();
-                }
+                that.restore(data.value.isReady, data.value.oponentId, data.value.shipMap, data.value.history);
                 break;
             case "finish":
                 that.finished = true;
-                if (data.value) {
-                    $("#won").show();
-                } else {
-                    $("#lost").show();
-                }
-                $("#isReady").hide();
-                $("#opReady").hide();
-                $("#yourTurn").hide();
-                $("#opTurn").hide();
-                $("#startAgain").show();
+                that.showFinish(data.value);
                 break;
             case "autofill":
                 that.addShips(data.value);
@@ -225,6 +192,48 @@ function clientState() {
             default:
                 break;
         }
+    }
+
+    this.restore = function (wasReady, oponentId, shipMap, history) {
+        that.isReady = wasReady;
+        that.oponentId = oponentId == undefined ? "" : oponentId;
+        if (that.isReady) {
+            that.addShips(shipMap);
+            $("#autoFill").hide();
+            $("#sayReady").hide();
+            $("#isReady").show();
+        }
+        if (history) {
+            that.oponentIsReady = true;
+            history.reverse().forEach(row => that.addHistory(row))
+        }
+        if (that.map.length == 0) {
+            that.init();
+        }
+    }
+
+    this.showCanFire = function () {
+        if (that.oponentId == "") {
+            that.canfire = false;
+            return;
+        }
+        that.canfire = data.value == undefined ? false : data.value;
+        if (that.canfire) {
+            $("#yourTurn").show();
+            $("#opTurn").hide();
+        } else {
+            $("#yourTurn").hide();
+            $("#opTurn").show();
+        }
+    }
+
+    this.showFinish = function (hasWon) {
+        $(hasWon ? "#won" : "#lost").show();
+        $("#isReady").hide();
+        $("#opReady").hide();
+        $("#yourTurn").hide();
+        $("#opTurn").hide();
+        $("#startAgain").show();
     }
 
     this.addHistory = function (history) {
