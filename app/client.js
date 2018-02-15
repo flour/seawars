@@ -84,7 +84,9 @@ function Client(connection, id) {
         that.send("history", !history ? that.fireHistory[0] : history)
     };
 
-    this.finish = function (won) {
+    this.finish = function (won) {        
+        that.canFire = false;
+        that.isReady = false;
         that.send("finish", won);
         that.oponentId = "";
     }

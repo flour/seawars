@@ -91,15 +91,12 @@ function Storage() {
 
     this.finishGame = function (winner, loser) {
         var game = that.getGame(winner.id);
-        if (!game) return;
-        winner.finish(true);
-        winner.canFire = false;
-        winner.isReady = false;
+        if (!game)
+            return;
         if (loser == undefined)
             loser = that.getClientById(winner.oponentId);
+        winner.finish(true);
         loser.finish(false);
-        loser.canFire = false;
-        loser.isReady = false;
         that.removeGame(game);
     }
 
