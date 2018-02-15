@@ -1,17 +1,13 @@
 const dto = require("./dto");
+const fs = require('fs');
 // I do not know how it should be... but pretend we get this stub from config or elsewhere
-const baseShipMap = [
-    { name: "four-deck", decklength: 4, state: "infight", location: [] },
-    { name: "three-deck-1", decklength: 3, state: "infight", location: [] },
-    { name: "three-deck-2", decklength: 3, state: "infight", location: [] },
-    { name: "two-deck-1", decklength: 2, state: "infight", location: [] },
-    { name: "two-deck-2", decklength: 2, state: "infight", location: [] },
-    { name: "two-deck-3", decklength: 2, state: "infight", location: [] },
-    { name: "one-deck-1", decklength: 1, state: "infight", location: [] },
-    { name: "one-deck-2", decklength: 1, state: "infight", location: [] },
-    { name: "one-deck-3", decklength: 1, state: "infight", location: [] },
-    { name: "one-deck-4", decklength: 1, state: "infight", location: [] }
-];
+var baseShipMap;
+fs.readFile('./app/baseships.json', 'utf-8', function (error, data) {
+    if (error)
+        throw error;
+    baseShipMap = data;
+});
+
 
 function getRnd(max) {
     return Math.floor(Math.random() * (max + 1));
@@ -158,22 +154,29 @@ function Client(connection, id) {
             }
         }
         var cells = [];
-        that.shipMap = baseShipMap;
-        for (var ship in that.shipMap) {
-            if (that.freeCells.length == 0) {
-                that.sendAutoMap();
-                return;
-            }
-            var built = false;
-            while (!built) {
-                var kx = getRnd(1);
-                var x = kx == 0 ? getRnd(9) : getRnd(10 - ship.decklength);
-                var ky = kx == 0 ? 1 : 0;
-                var y = kx == 0 ? getRnd(10 - ship.decklength) : getRnd(9);
-                built = that.checkLocation(x, y, kx, ky, ship);
+        that.shipMap = JSON.parse(baseShipMap).data;
+
+        /*
+        for (const i in that.shipMap) {
+            if (that.shipMap.hasOwnProperty(i)) {
+                const ship = that.shipMap[i];
+                if (that.freeCells.length == 0) {
+                    that.sendAutoMap();
+                    return;
+                }
+                var built = false;
+                while (!built) {
+                    var kx = getRnd(1);
+                    var x = kx == 0 ? getRnd(9) : getRnd(10 - ship.decklength);
+                    var ky = kx == 0 ? 1 : 0;
+                    var y = kx == 0 ? getRnd(10 - ship.decklength) : getRnd(9);
+                    built = that.checkLocation(x, y, kx, ky, ship);
+                }
+                cells.push(ship.location);
             }
         }
-        /*
+        */
+
         that.shipMap.forEach(ship => {
             if (!that.prepareAutoMap(ship)) {
                 that.sendAutoMap();
@@ -181,19 +184,21 @@ function Client(connection, id) {
             }
             cells.push(ship.location);
         });
-        */
         that.send("autofill", cells);
     };
-    /*
+
     this.prepareAutoMap = function (ship) {
         do {
             if (that.freeCells.length == 0)
                 return false;
-
-        } while (!);
+            var kx = getRnd(1);
+            var x = kx == 0 ? getRnd(9) : getRnd(10 - ship.decklength);
+            var ky = kx == 0 ? 1 : 0;
+            var y = kx == 0 ? getRnd(10 - ship.decklength) : getRnd(9);
+        } while (!that.checkLocation(x, y, kx, ky, ship));
         return true;
     };
-    */
+
     this.checkLocation = function (x, y, kx, ky, ship) {
         var shipCells = [];
         var decklength = ship.decklength;

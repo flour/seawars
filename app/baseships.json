@@ -1,0 +1,64 @@
+{
+    "data": [
+        {
+            "name": "four-deck",
+            "decklength": 4,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "three-deck-1",
+            "decklength": 3,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "three-deck-2",
+            "decklength": 3,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "two-deck-1",
+            "decklength": 2,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "two-deck-2",
+            "decklength": 2,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "two-deck-3",
+            "decklength": 2,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "one-deck-1",
+            "decklength": 1,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "one-deck-2",
+            "decklength": 1,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "one-deck-3",
+            "decklength": 1,
+            "state": "infight",
+            "location": []
+        },
+        {
+            "name": "one-deck-4",
+            "decklength": 1,
+            "state": "infight",
+            "location": []
+        }
+    ]
+}

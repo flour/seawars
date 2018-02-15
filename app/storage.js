@@ -74,11 +74,14 @@ function Storage() {
         if (!client)
             return;
         client.sendReady(true);
-        var oponent = storage.getClientById(client.oponentId)
+        var oponent = that.getClientById(client.oponentId)
         if (oponent == null)
             return;
         oponent.sendOpReady(true);
         if (!oponent.isReady)
+            return;
+        var game = that.getGame(client.id);
+        if (!game)
             return;
         game.clientOne.startGame();
         game.clientTwo.startGame();
@@ -107,8 +110,8 @@ function Storage() {
     this.makeFire = function (from, to, cell) {
         if (!from || !from.myTurn || !to || !cell)
             return;
-        var fromHistory = new dto.FireHistory(model.value, true, true, false);
-        var toHistory = new dto.FireHistory(model.value, true, false, false);
+        var fromHistory = new dto.FireHistory(cell, true, true, false);
+        var toHistory = new dto.FireHistory(cell, true, false, false);
         if (to.isMissed(cell)) {
             from.missedOponent(cell);
             from.canFire(false);

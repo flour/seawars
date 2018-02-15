@@ -146,7 +146,7 @@ function clientState() {
                 a("Your oponent disconnected", "Wait for 10 seconds...");
                 break;
             case "canfire":
-                that.showCanFire();
+                that.showCanFire(data.value);
                 break;
             case "missed":
                 $("#cell_" + (data.value.x + 1) + "_" + (data.value.y + 1) + "_op").attr("class", "missedCell");
@@ -212,12 +212,12 @@ function clientState() {
         }
     }
 
-    this.showCanFire = function () {
+    this.showCanFire = function (canFire) {
         if (that.oponentId == "") {
             that.canfire = false;
             return;
         }
-        that.canfire = data.value == undefined ? false : data.value;
+        that.canfire = canFire == undefined ? false : canFire;
         if (that.canfire) {
             $("#yourTurn").show();
             $("#opTurn").hide();

@@ -38,7 +38,7 @@ var server = ws.createServer(function (connection) {
             case "fire":
                 if (!client)
                     break;
-                storage.makeFire(client, storage.getClientById(client.oponentId));
+                storage.makeFire(client, storage.getClientById(client.oponentId), model.value);
                 break;
             case "connect":
                 if (!client) {
@@ -80,7 +80,7 @@ var server = ws.createServer(function (connection) {
     }
     connection.clientId = clientId;
 
-}).listen(55555, "seawars.app", function (connection) {
+}).listen(55555, "127.0.0.1", function (connection) {
     var ifaces = JSON.stringify(os.networkInterfaces());
     console.log("Started listening..." + os.hostname() + "\n" + ifaces);
 });
