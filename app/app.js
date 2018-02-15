@@ -80,7 +80,7 @@ var server = ws.createServer(function (connection) {
     }
     connection.clientId = clientId;
 
-}).listen(55555, "127.0.0.1", function (connection) {
+}).listen(55555, "seawars.app", function (connection) {
     var ifaces = JSON.stringify(os.networkInterfaces());
     console.log("Started listening..." + os.hostname() + "\n" + ifaces);
 });
