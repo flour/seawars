@@ -44,8 +44,9 @@ function Client(connection, id) {
         that.send("op_ready", ready);
     };
 
-    this.gotOponent = function (oponent) {
-        that.send("oponent", oponent);
+    this.gotOponent = function (oponentId) {
+        that.oponentId = oponentId;
+        that.send("oponent", that.oponentId);
     }
 
     this.oponentDisconnected = function () {
@@ -85,10 +86,13 @@ function Client(connection, id) {
     };
 
     this.finish = function (won) {        
-        that.canFire = false;
-        that.isReady = false;
-        that.send("finish", won);
         that.oponentId = "";
+        that.isReady = false;
+        that.myTurn = false;
+        that.fireHistory = [];
+        that.freeCells = [];
+        that.shipMap = [];
+        that.send("finish", won);
     }
 
     this.restore = function () {

@@ -203,13 +203,12 @@ function clientState() {
             $("#sayReady").hide();
             $("#isReady").show();
         }
-        if (history) {
+        if (history && that.isReady) {
             that.oponentIsReady = true;
             history.reverse().forEach(row => that.addHistory(row))
         }
-        if (that.map.length == 0) {
-            that.init();
-        }
+        if (shipMap.length == 0)
+            that.init(!that.isReady && that.oponentId == "");
     }
 
     this.showCanFire = function (canFire) {
@@ -255,10 +254,10 @@ function clientState() {
 
     this.drawEmptyMap = function (container, suffix, clear) {
         var id = "battlefield_cells_" + suffix;
-        if (clear != undefined || document.getElementById(id)) {
+        if (clear != undefined && document.getElementById(id)) {
             for (let i = 1; i < 11; i++) {
                 for (let j = 1; j < 11; j++) {
-                    var cell = document.getElementById("cell_" + i + "_" + j);
+                    var cell = document.getElementById("cell_" + i + "_" + j + (suffix != "" ? "_" + suffix : ""));
                     if (cell == undefined || cell.classList.length == 0) continue;
                     cell.className = "fieldcell";
                     cell.innerHTML = "";
@@ -327,10 +326,10 @@ function clientState() {
 
     this.ready = function () { that.sendParam(new DTO("ready").toString()); }
 
-    this.init = function () {
+    this.init = function (clear) {
         that.isReady = false;
-        that.drawEmptyMap(document.getElementById("yourField"));
-        that.drawEmptyMap(document.getElementById("opponentField"), "op");
+        that.drawEmptyMap(document.getElementById("yourField"), "", clear != undefined ? clear : false);
+        that.drawEmptyMap(document.getElementById("opponentField"), "op", clear != undefined ? clear : false);
         $("#appAlert").hide();
         $("#opReady").hide();
         $("#yourTurn").hide();
@@ -369,10 +368,11 @@ $(document).ready(function () {
 
     $("#hideMessage").click(function () { $("#appAlert").hide(); });
     $("#autoFill").click(function () { state.autoFill(); });
-    $("#sayReady").click(function () {
-        $("#history").html("")
+    $("#startAgain").click(function () {
+        state.init(true);
+        $("#history").html("");
         $("#autoFill").show();
-        $("#isReady").show();
+        $("#sayReady").show();
     });
     $("#sayReady").click(function () {
         if (state.map.length == 0) {

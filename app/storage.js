@@ -17,14 +17,7 @@ function Storage() {
             client.connection = connection;
         }
 
-        if (client.oponentId == "") {
-            var oponent = that.getFreeClient(client.id)
-            if (!oponent)
-                return client;
-            client.oponentId = oponent.id;
-            oponent.oponentId = client.id;
-            that.addGame(client);
-        }
+
         return client;
     };
 
@@ -62,6 +55,7 @@ function Storage() {
         if (oponent == null) return false;
         var game = new dto.Game(client, oponent);
         that.games.push(game);
+        return game;
     }
 
     this.getGame = function (clientId) {
@@ -73,14 +67,26 @@ function Storage() {
     this.startGame = function (client) {
         if (!client)
             return;
+        var oponent;
+        var game;
+        if (client.oponentId == "") {
+            oponent = that.getFreeClient(client.id)
+            if (!oponent)
+                return client;
+            client.gotOponent(oponent.id);
+            oponent.gotOponent(client.id);
+            game = that.addGame(client);
+        } else {
+            oponent = that.getClientById(client.oponentId);
+            if (!oponent) return;
+        }
         client.sendReady(true);
-        var oponent = that.getClientById(client.oponentId)
         if (oponent == null)
             return;
         oponent.sendOpReady(true);
         if (!oponent.isReady)
             return;
-        var game = that.getGame(client.id);
+        game = that.getGame(client.id);
         if (!game)
             return;
         game.clientOne.startGame();
